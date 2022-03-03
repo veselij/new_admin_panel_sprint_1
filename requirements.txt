@@ -1,13 +1,15 @@
 asgiref==3.5.0
 astor==0.8.1
 attrs==21.4.0
-bandit==1.7.3
+bandit==1.7.2
 cfgv==3.3.1
 darglint==1.8.1
 distlib==0.3.4
 Django==3.2
 django-debug-toolbar==3.2.4
 django-split-settings==1.1.0
+django-stubs==1.9.0
+django-stubs-ext==0.3.1
 docutils==0.18.1
 eradicate==2.0.0
 Faker==13.3.0
@@ -32,6 +34,8 @@ identify==2.4.11
 iniconfig==1.1.1
 isort==5.10.1
 mccabe==0.6.1
+mypy==0.931
+mypy-extensions==0.4.3
 nodeenv==1.6.0
 packaging==21.3
 pbr==5.8.1
@@ -59,6 +63,9 @@ sqlparse==0.4.2
 stevedore==3.5.0
 testfixtures==6.18.4
 toml==0.10.2
+tomli==2.0.1
+types-pytz==2021.3.5
+types-PyYAML==6.0.4
 typing-extensions==3.10.0.2
 virtualenv==20.13.2
 wemake-python-styleguide==0.16.0
