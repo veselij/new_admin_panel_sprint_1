@@ -1,2 +1,7 @@
 /venv
 /postgresq
+/02_movies_admin/config/.env
+*.pyc
+*~
+__pycache__
+.DS_Store
