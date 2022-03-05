@@ -36,6 +36,14 @@ class Genre(UUIDMixin, TimeStampedMixin):
         verbose_name = _("genre")
         verbose_name_plural = _("genres")
 
+    def __str__(self):
+        """Override default.
+
+        Returns:
+            genre name.
+        """
+        return self.name
+
 
 class Filmwork(UUIDMixin, TimeStampedMixin):
     """Class model represents model for cinematographic work."""
