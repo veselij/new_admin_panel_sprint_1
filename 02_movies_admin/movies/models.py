@@ -51,20 +51,21 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
     class FilmType(models.TextChoices):
         """Choices for filmwork types."""
 
-        movie = "MV", _("movie")
-        tv_show = "TV", _("tv_show")
+        movie = "movie", _("movie")
+        tv_show = "tv_show", _("tv_show")
 
     title = models.CharField(_("title"), max_length=255)
     description = models.TextField(_("description"))
     creation_date = models.DateField(_("creation_date"), blank=True)
     rating = models.FloatField(_("rating"), blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)])
-    type = models.CharField("type", choices=FilmType.choices, max_length=2)
+    type = models.CharField("type", choices=FilmType.choices, max_length=7)
     genres = models.ManyToManyField(Genre, through="GenreFilmwork")
 
     class Meta:
         db_table = "content\".\"film_work"
         verbose_name = _("filmwork")
         verbose_name_plural = _("filmworks")
+        indexes = [models.Index(fields=("creation_date", "rating"), name="film_work_creation_rating_idx")]
 
     def __str__(self) -> str:
         """Override default.
@@ -84,6 +85,8 @@ class GenreFilmwork(UUIDMixin):
 
     class Meta:
         db_table = "content\".\"genre_film_work"
+        constraints = [models.UniqueConstraint(fields=["film_work", "genre"], name="film_work_genre_idx")]
+        indexes = [models.Index(fields=("film_work", "genre"), name="film_work_genre_idx")]
 
 
 class Person(UUIDMixin, TimeStampedMixin):
@@ -100,10 +103,19 @@ class Person(UUIDMixin, TimeStampedMixin):
 class PersonFilmwork(UUIDMixin):
     """Class model represents relations between person and filmwork models."""
 
+    class Roles(models.TextChoices):
+        """Choices for roles."""
+
+        actor = "actor", _("actor")
+        director = "director", _("director")
+        writer = "writer", _("writer")
+
     film_work = models.ForeignKey("Filmwork", on_delete=models.CASCADE)
     person = models.ForeignKey("Person", on_delete=models.CASCADE)
-    role = models.TextField(_("role"), null=True)
+    role = models.TextField(_("role"), choices=Roles.choices, max_length=8, null=True)
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "content\".\"person_film_work"
+        constraints = [models.UniqueConstraint(fields=["film_work", "person", "role"], name="film_work_person_role_idx")]
+        indexes = [models.Index(fields=("film_work", "person", "role"), name="film_work_person_role_idx")]
