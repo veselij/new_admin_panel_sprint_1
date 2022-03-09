@@ -5,10 +5,11 @@ import sqlite3
 import uuid
 from dataclasses import dataclass, fields
 from datetime import date, datetime
-from typing import Optional, Union
+from typing import Generator, Optional, Union
 
 import psycopg2
 from psycopg2 import sql as pg_sql
+from psycopg2.extensions import connection as _connection
 from psycopg2.extras import DictCursor
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -79,7 +80,7 @@ class PersonFilmwork:
     created_at: Optional[datetime]
 
 
-def get_row_count(connection, sql):
+def get_row_count(connection: Union[sqlite3.Connection, _connection], sql: str) -> int:
     """Get one iteration with one row in result.
 
     Args:
@@ -97,7 +98,12 @@ def get_row_count(connection, sql):
     return rows
 
 
-def select_from_db(connection, sql, sql_params=None, n_rows=100):
+def select_from_db(
+    connection: Union[sqlite3.Connection, _connection],
+    sql: str,
+    sql_params: Optional[dict[str, tuple]] = None,
+    n_rows: int = 100,
+) -> Generator[list, None, None]:
     """Retrive data from sqlite or postgress db.
 
     Args:
@@ -126,7 +132,7 @@ def select_from_db(connection, sql, sql_params=None, n_rows=100):
 class TablesChecker:
     """Class to compare tables from two databases."""
 
-    def __init__(self, sqlite_conn, pg_conn):
+    def __init__(self, sqlite_conn: sqlite3.Connection, pg_conn: _connection) -> None:
         """Initizlizaiton of table checker.
 
         Args:
@@ -142,7 +148,7 @@ class TablesChecker:
         self._sql_sqlite = 'select {0} from {1}'
         self.rows_stats = {}
 
-    def calculate_tables_stats(self):
+    def calculate_tables_stats(self) -> None:
         """Calculate rows counts and matches in SQLite and Postgress tables."""
         for table, dc in table_registry.items():
             self._table = table
@@ -153,13 +159,13 @@ class TablesChecker:
                 self._get_rows_from_pg_by_ids(sqlite_row)
                 self._compare_rows(sqlite_row)
 
-    def _count_rows_in_table(self):
+    def _count_rows_in_table(self) -> None:
         """Count total rows per table."""
         sqlite_rows = get_row_count(self._sqlite_conn, self._sql_rows_count.format(self._table))
         pg_rows = get_row_count(self._pg_conn, self._sql_rows_count.format(self._table))
         self.rows_stats[self._table] = TableRowsStats(sqlite_rows, pg_rows, 0)
 
-    def _get_rows_from_pg_by_ids(self, sqlite_rows):
+    def _get_rows_from_pg_by_ids(self, sqlite_rows: list) -> None:
         """Get number rows from Postgress table with in filter.
 
         Args:
@@ -174,7 +180,7 @@ class TablesChecker:
             pg_rows = []
         self._pg_rows = pg_rows
 
-    def _compare_rows(self, sqlite_rows):
+    def _compare_rows(self, sqlite_rows: list) -> None:
         """Compare sqlite and postgress rows.
 
         Args:
@@ -186,7 +192,7 @@ class TablesChecker:
                     self.rows_stats[self._table].matched += 1
                     break
 
-    def _convert(self, row):
+    def _convert(self, row: list) -> tuple:
         """Convert dataime column in row to string.
 
         Args:

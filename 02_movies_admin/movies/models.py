@@ -36,7 +36,7 @@ class Genre(UUIDMixin, TimeStampedMixin):
         verbose_name = _("genre")
         verbose_name_plural = _("genres")
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Override default.
 
         Returns:
@@ -66,7 +66,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
         verbose_name = _("filmwork")
         verbose_name_plural = _("filmworks")
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Override default.
 
         Returns:
