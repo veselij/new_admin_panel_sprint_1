@@ -1,5 +1,7 @@
 """Django admin definitions."""
 from django.contrib import admin
+from django.db.models import Prefetch
+from django.utils.translation import gettext_lazy as _
 from movies.models import Filmwork, Genre, GenreFilmwork, Person, PersonFilmwork
 
 
@@ -28,9 +30,37 @@ class FilmworkAdmin(admin.ModelAdmin):
     """Admin class for filmwork with list to display, search and filters."""
 
     inlines = (GenreFilmworkInline, )
-    list_display = ("title", "type", "creation_date", "rating")
+    list_display = ("title", "type", "creation_date", "rating", "film_genres", "film_directors", "film_writers")
     list_filter = ("type",)
     search_fields = ("title", "description", "id")
+
+    def film_genres(self, genres):
+        return ",".join([genre.name for genre in genres.genres.all()])
+
+    film_genres.allow_tags = True
+    film_genres.short_description = _("FILM_GENRES")
+
+    def film_directors(self, directors):
+        return ",".join({director.full_name for director in directors.directors})
+
+    film_directors.allow_tags = True
+    film_directors.short_description = _("FILM_DIRECTORS")
+
+    def film_writers(self, writers):
+        return ",".join({writer.full_name for writer in writers.writers})
+
+    film_writers.allow_tags = True
+    film_writers.short_description = _("FILM_WRITERS")
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        directors = Person.objects.filter(personfilmwork__role="director").order_by("full_name")
+        writers = Person.objects.filter(personfilmwork__role="writer").order_by("full_name")
+        return qs.prefetch_related(
+            Prefetch("genres", queryset=Genre.objects.order_by('name')),
+            Prefetch("persons", queryset=directors, to_attr="directors"),
+            Prefetch("persons", queryset=writers, to_attr="writers"),
+        )
 
 
 @admin.register(Person)

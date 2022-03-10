@@ -45,6 +45,17 @@ class Genre(UUIDMixin, TimeStampedMixin):
         return self.name
 
 
+class Person(UUIDMixin, TimeStampedMixin):
+    """Model for filmwork persons."""
+
+    full_name = models.CharField(_("full_name"), max_length=255)
+
+    class Meta:
+        db_table = "content\".\"person"
+        verbose_name = _("person")
+        verbose_name_plural = _("persons")
+
+
 class Filmwork(UUIDMixin, TimeStampedMixin):
     """Class model represents model for cinematographic work."""
 
@@ -60,6 +71,7 @@ class Filmwork(UUIDMixin, TimeStampedMixin):
     rating = models.FloatField(_("rating"), blank=True, validators=[MinValueValidator(0), MaxValueValidator(100)])
     type = models.CharField("type", choices=FilmType.choices, max_length=7)
     genres = models.ManyToManyField(Genre, through="GenreFilmwork")
+    persons = models.ManyToManyField(Person, through="PersonFilmwork")
 
     class Meta:
         db_table = "content\".\"film_work"
@@ -87,17 +99,6 @@ class GenreFilmwork(UUIDMixin):
         db_table = "content\".\"genre_film_work"
         constraints = [models.UniqueConstraint(fields=["film_work", "genre"], name="film_work_genre_idx")]
         indexes = [models.Index(fields=("film_work", "genre"), name="film_work_genre_idx")]
-
-
-class Person(UUIDMixin, TimeStampedMixin):
-    """Model for filmwork persons."""
-
-    full_name = models.CharField(_("full_name"), max_length=255)
-
-    class Meta:
-        db_table = "content\".\"person"
-        verbose_name = _("person")
-        verbose_name_plural = _("persons")
 
 
 class PersonFilmwork(UUIDMixin):
