@@ -34,23 +34,17 @@ class FilmworkAdmin(admin.ModelAdmin):
     list_filter = ("type",)
     search_fields = ("title", "description", "id")
 
+    @admin.display(description=_("FILM_GENRES"))
     def film_genres(self, genres):
         return ",".join([genre.name for genre in genres.genres.all()])
 
-    film_genres.allow_tags = True
-    film_genres.short_description = _("FILM_GENRES")
-
+    @admin.display(description=_("FILM_DIRECTORS"))
     def film_directors(self, directors):
         return ",".join({director.full_name for director in directors.directors})
 
-    film_directors.allow_tags = True
-    film_directors.short_description = _("FILM_DIRECTORS")
-
+    @admin.display(description=_("FILM_WRITERS"))
     def film_writers(self, writers):
         return ",".join({writer.full_name for writer in writers.writers})
-
-    film_writers.allow_tags = True
-    film_writers.short_description = _("FILM_WRITERS")
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
